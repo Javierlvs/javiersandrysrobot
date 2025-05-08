@@ -6,11 +6,21 @@ import urandom
 brain=Brain()
 
 # Robot configuration code
-
+left_motor_a = Motor(Ports.PORT2, GearSetting.RATIO_18_1, False)
+left_motor_b = Motor(Ports.PORT4, GearSetting.RATIO_18_1, False)
+left_drive_smart = MotorGroup(left_motor_a, left_motor_b)
+right_motor_a = Motor(Ports.PORT1, GearSetting.RATIO_18_1, True)
+right_motor_b = Motor(Ports.PORT3, GearSetting.RATIO_18_1, True)
+right_drive_smart = MotorGroup(right_motor_a, right_motor_b)
+drivetrain = DriveTrain(left_drive_smart, right_drive_smart, 319.19, 295, 40, MM, 1)
+motor_group_5_motor_a = Motor(Ports.PORT5, GearSetting.RATIO_36_1, False)
+motor_group_5_motor_b = Motor(Ports.PORT6, GearSetting.RATIO_36_1, True)
+motor_group_5 = MotorGroup(motor_group_5_motor_a, motor_group_5_motor_b)
+distance_20 = Distance(Ports.PORT20)
+line_tracker_h = Line(brain.three_wire_port.h)
 
 # wait for rotation sensor to fully initialize
 wait(30, MSEC)
-
 
 # Make random actually random
 def initializeRandomSeed():
@@ -20,7 +30,6 @@ def initializeRandomSeed():
       
 # Set random seed 
 initializeRandomSeed()
-
 
 def play_vexcode_sound(sound_name):
     # Helper to make playing sounds from the V5 in VEXcode easier and
@@ -38,12 +47,22 @@ print("\033[2J")
 # Main autonomous logic
 def when_started1():
     while True:
-        # Start turning right
+        # Start turning right to look for object
         drivetrain.set_drive_velocity(30, PERCENT)
         drivetrain.turn(RIGHT)
 
-        # Wait until a medium or large object is detected
+        # Object detection loop
         while True:
+            # Check line tracker first
+            if line_tracker_h.reflectivity() < 10:  # adjust threshold if needed
+                drivetrain.stop()
+                # Turn 180 degrees
+                drivetrain.turn_for(RIGHT, 180, DEGREES)
+                # Drive forward after turn
+                drivetrain.drive_for(FORWARD, 12, INCHES)
+                break  # Exit this inner loop and resume top loop
+
+            # Check distance sensor for object
             object_size = distance_20.object_size()
             if object_size == ObjectSizeType.MEDIUM or object_size == ObjectSizeType.LARGE:
                 drivetrain.stop()
@@ -52,17 +71,18 @@ def when_started1():
                 # Set motor group velocity
                 motor_group_5.set_velocity(50, PERCENT)
 
-                # Spin forward for 1 seconds
+                # Spin forward for 1 second
                 motor_group_5.spin(FORWARD)
-                wait(2, SECONDS)
+                wait(1, SECONDS)
                 motor_group_5.stop()
 
-                # Then reverse for 1 seconds
+                # Then reverse for 1 second
                 motor_group_5.spin(REVERSE)
-                wait(2, SECONDS)
+                wait(1, SECONDS)
                 motor_group_5.stop()
 
-                break  # Start next cycle
+                break  # Exit inner loop to continue scanning again
+
             wait(100, MSEC)
 
 # Run the program
