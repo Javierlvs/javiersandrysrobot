@@ -1,3 +1,4 @@
+
 from vex import *
 import urandom
 
@@ -134,7 +135,7 @@ def autonomous_loop():
                 wait(1.5, SECONDS)
                 motor_group_5.stop()
                 motor_group_5.spin(FORWARD)
-                wait(1.4, SECONDS)
+                wait(1.45, SECONDS)
                 motor_group_5.stop()
                 break
 
