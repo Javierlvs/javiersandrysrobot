@@ -1,8 +1,7 @@
-
 from vex import *
 import urandom
 
-#region VEXcode Generated Robot Configuration
+#region VEXcode Generated Robot Configuration 
 
 # Brain should be defined by default
 brain = Brain()
@@ -53,6 +52,19 @@ def rc_auto_loop_function_controller_1():
     global drivetrain_l_needs_to_be_stopped_controller_1, drivetrain_r_needs_to_be_stopped_controller_1, controller_1_right_shoulder_control_motors_stopped, remote_control_code_enabled
     while True:
         if remote_control_code_enabled:
+            # Check for blue color even in manual mode
+            optical_9.set_light_power(100, PERCENT)
+            optical_9.set_light(True)
+            color = optical_9.color()
+            if color == Color.BLUE:
+                drivetrain.stop()
+                drivetrain.set_drive_velocity(50, PERCENT)
+                drivetrain.turn_for(RIGHT, 180, DEGREES)
+                drivetrain.drive_for(FORWARD, 10, INCHES)
+                wait(500, MSEC)
+                continue  # Skip manual input while reacting to blue
+
+            # Controller drive code
             left_speed = controller_1.axis3.position() + controller_1.axis1.position()
             right_speed = controller_1.axis3.position() - controller_1.axis1.position()
 
@@ -78,6 +90,7 @@ def rc_auto_loop_function_controller_1():
                 right_drive_smart.set_velocity(right_speed, PERCENT)
                 right_drive_smart.spin(FORWARD)
 
+            # Motor group control
             if controller_1.buttonR1.pressing():
                 motor_group_5.spin(FORWARD)
                 controller_1_right_shoulder_control_motors_stopped = False
@@ -145,7 +158,7 @@ def autonomous_loop():
             if color == Color.BLUE:
                 drivetrain.stop()
                 drivetrain.turn_for(RIGHT, 180, DEGREES)
-                drivetrain.drive_for(FORWARD, 10, INCHES)
+                drivetrain.drive_for(REVERSE, 20, INCHES)
                 wait(500, MSEC)
                 break
 
