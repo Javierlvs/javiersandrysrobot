@@ -52,17 +52,17 @@ def rc_auto_loop_function_controller_1():
     global drivetrain_l_needs_to_be_stopped_controller_1, drivetrain_r_needs_to_be_stopped_controller_1, controller_1_right_shoulder_control_motors_stopped, remote_control_code_enabled
     while True:
         if remote_control_code_enabled:
-            # Check for blue color even in manual mode
+            # Check for hue in range 80–160 (green–aqua)
             optical_9.set_light_power(100, PERCENT)
             optical_9.set_light(True)
-            color = optical_9.color()
-            if color == Color.BLUE:
+            hue = optical_9.hue()
+            if 80 <= hue <= 160:
                 drivetrain.stop()
                 drivetrain.set_drive_velocity(50, PERCENT)
                 drivetrain.turn_for(RIGHT, 180, DEGREES)
                 drivetrain.drive_for(FORWARD, 10, INCHES)
                 wait(500, MSEC)
-                continue  # Skip manual input while reacting to blue
+                continue
 
             # Controller drive code
             left_speed = controller_1.axis3.position() + controller_1.axis1.position()
@@ -119,12 +119,12 @@ def autonomous_loop():
 
         optical_9.set_light_power(100, PERCENT)
         optical_9.set_light(True)
-        color = optical_9.color()
+        hue = optical_9.hue()
 
-        if color == Color.BLUE:
+        if 80 <= hue <= 160:
             drivetrain.set_drive_velocity(50, PERCENT)
             drivetrain.turn_for(RIGHT, 180, DEGREES)
-            drivetrain.drive_for(FORWARD, 10, INCHES)
+            drivetrain.drive_for(FORWARD, 20, INCHES)
             wait(500, MSEC)
 
         drivetrain.set_drive_velocity(30, PERCENT)
@@ -152,13 +152,11 @@ def autonomous_loop():
                 motor_group_5.stop()
                 break
 
-            optical_9.set_light_power(100, PERCENT)
-            optical_9.set_light(True)
-            color = optical_9.color()
-            if color == Color.BLUE:
+            hue = optical_9.hue()
+            if 80 <= hue <= 160:
                 drivetrain.stop()
                 drivetrain.turn_for(RIGHT, 180, DEGREES)
-                drivetrain.drive_for(REVERSE, 20, INCHES)
+                drivetrain.drive_for(FORWARD, 10, INCHES)
                 wait(500, MSEC)
                 break
 
